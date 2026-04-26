@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Green Cloud Computing - Smart VM Optimization</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+
+    body {
+      margin: 0;
+      color: white;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #06111f, #0a2238, #0b4b43);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg-particles {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(100vh) scale(0.6); opacity: 0; }
+      10% { opacity: 1; }
+      to { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+
+    .container {
+      max-width: 1500px;
+      margin: auto;
+      padding: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 8px 0 6px;
+      font-size: 34px;
+      text-shadow: 0 0 14px rgba(96,165,250,0.35);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #cbd5e1;
+      font-size: 18px;
+      margin-bottom: 18px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.25s;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+    }
+
+    button:hover { transform: scale(1.05); }
+
+    .btn-initial { background: #0ea5e9; }
+    .btn-normal { background: #2563eb; }
+    .btn-ai { background: #7c3aed; }
+    .btn-failure { background: #dc2626; }
+    .btn-reset { background: #d97706; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.22);
+      backdrop-filter: blur(8px);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: #dbeafe;
+    }
+
+    .value {
+      font-size: 28px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .section {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.18);
+      position: relative;
+      backdrop-filter: blur(8px);
+    }
+
+    .task-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .task {
+      min-width: 120px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(59,130,246,0.15);
+      transition: 0.45s;
+      text-align: center;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .task.assigned {
+      background: rgba(34,197,94,0.22);
+      border-color: #22c55e;
+      box-shadow: 0 0 14px rgba(34,197,94,0.25);
+      animation: taskPulse 1.8s infinite;
+    }
+
+    @keyframes taskPulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .broker-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 22px;
+      position: relative;
+    }
+
+    .broker {
+      width: 280px;
+      text-align: center;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(168,85,247,0.16);
+      border: 1px solid rgba(168,85,247,0.45);
+      box-shadow: 0 0 18px rgba(168,85,247,0.18);
+      transition: 0.35s;
+    }
+
+    .broker.active {
+      animation: brokerPulse 1.3s infinite;
+      box-shadow: 0 0 22px rgba(168,85,247,0.6);
+    }
+
+    @keyframes brokerPulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+
+    .broker h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .broker p {
+      margin: 0;
+      color: #e9d5ff;
+    }
+
+    .status-line {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fde68a;
+      text-align: center;
+      min-height: 28px;
+      margin-bottom: 12px;
+      transition: 0.3s;
+    }
+
+    .status-line.alert {
+      color: #fecaca;
+      animation: blinkWarn 1s infinite;
+    }
+
+    @keyframes blinkWarn {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 4fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .steps-panel {
+      background: rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      min-height: 500px;
+    }
+
+    .steps-panel h3 {
+      margin-top: 0;
+      color: #86efac;
+      text-align: center;
+    }
+
+    .step {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border-left: 4px solid #64748b;
+      color: #e2e8f0;
+      transition: 0.4s;
+      font-size: 14px;
+    }
+
+    .step.active {
+      background: rgba(34,197,94,0.18);
+      border-left-color: #22c55e;
+      color: #dcfce7;
+      transform: translateX(4px);
+      box-shadow: 0 0 14px rgba(34,197,94,0.15);
+    }
+
+    .step.failure {
+      background: rgba(220,38,38,0.18);
+      border-left-color: #ef4444;
+      color: #fee2e2;
+      transform: translateX(4px);
+      box-shadow: 0 0 14px rgba(239,68,68,0.2);
+    }
+
+    .datacenter {
+      position: relative;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      min-height: 560px;
+    }
+
+    .datacenter-title {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #93c5fd;
+      font-weight: bold;
+    }
+
+    .hosts {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .host {
+      background: rgba(255,255,255,0.10);
+      border: 2px solid rgba(255,255,255,0.18);
+      border-radius: 20px;
+      padding: 12px;
+      min-height: 360px;
+      position: relative;
+      transition: 0.7s;
+      box-shadow: 0 10px 18px rgba(0,0,0,0.22);
+    }
+
+    .host.on {
+      border-color: #22c55e;
+      box-shadow: 0 0 18px rgba(34,197,94,0.22);
+    }
+
+    .host.off {
+      border-color: #ef4444;
+      background: rgba(127,29,29,0.45);
+      box-shadow: 0 0 18px rgba(239,68,68,0.20);
+      opacity: 0.55;
+      filter: grayscale(35%);
+      transform: scale(0.98);
+    }
+
+    .host.failed {
+      border-color: #f43f5e;
+      background: rgba(136, 19, 55, 0.6);
+      box-shadow: 0 0 20px rgba(244,63,94,0.35);
+      animation: shake 0.45s ease-in-out 2;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-4px); }
+    }
+
+    .host h2 {
+      text-align: center;
+      margin: 4px 0;
+      font-size: 21px;
+    }
+
+    .host p {
+      margin: 6px 0;
+      text-align: center;
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+
+    .light {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    .light.off {
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+    }
+
+    .light.fail {
+      background: #f43f5e;
+      box-shadow: 0 0 10px #f43f5e;
+    }
+
+    .host-content {
+      position: relative;
+      height: 130px;
+      margin-top: 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.07);
+      padding: 8px;
+      overflow: hidden;
+    }
+
+    .vm {
+      width: 62px;
+      height: 36px;
+      border-radius: 10px;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: all 2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .vm.moving {
+      box-shadow: 0 0 18px rgba(255,255,255,0.8);
+      animation: vmBounce 0.9s ease-in-out infinite alternate;
+    }
+
+    @keyframes vmBounce {
+      from { transform: translateY(0px) scale(1); }
+      to { transform: translateY(-6px) scale(1.04); }
+    }
+
+    .vm1 { background: #2563eb; }
+    .vm2 { background: #7c3aed; }
+    .vm3 { background: #db2777; }
+    .vm4 { background: #0f766e; }
+    .vm5 { background: #ea580c; }
+    .vm6 { background: #ca8a04; color: black; }
+    .vm7 { background: #dc2626; }
+    .vm8 { background: #16a34a; }
+    .vm9 { background: #4f46e5; }
+    .vm10 { background: #e11d48; }
+
+    .meter-group {
+      margin-top: 10px;
+    }
+
+    .meter-label {
+      font-size: 12px;
+      color: #dbeafe;
+      margin-bottom: 4px;
+    }
+
+    .meter {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 1.4s ease;
+    }
+
+    .cpu-fill { background: linear-gradient(90deg, #22c55e, #84cc16); }
+    .ram-fill { background: linear-gradient(90deg, #38bdf8, #2563eb); }
+    .power-fill { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+
+    .host-footer {
+      margin-top: 8px;
+      text-align: center;
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    .legend-box {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1.8fr 1.5fr;
+      gap: 16px;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+    }
+
+    .panel h3 {
+      margin-top: 0;
+      text-align: center;
+      color: #93c5fd;
+    }
+
+    .panel ul {
+      padding-left: 18px;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: white;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid rgba(255,255,255,0.14);
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .bars {
+      margin-top: 12px;
+    }
+
+    .bar-row {
+      margin: 16px 0;
+    }
+
+    .bar-label {
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .bar {
+      height: 26px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.12);
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      padding-right: 10px;
+      transition: width 1.6s ease;
+      min-width: 45px;
+    }
+
+    .fill.before { background: #f97316; }
+    .fill.normal { background: #22c55e; }
+    .fill.ai { background: #8b5cf6; }
+
+    .energy-badge {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #86efac;
+      animation: badgePulse 1.8s infinite;
+    }
+
+    @keyframes badgePulse {
+      0%,100% { transform: scale(1); text-shadow: 0 0 10px rgba(134,239,172,0.25); }
+      50% { transform: scale(1.03); text-shadow: 0 0 18px rgba(134,239,172,0.6); }
+    }
+
+    svg.overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .flow-line {
+      stroke: #60a5fa;
+      stroke-width: 3;
+      fill: none;
+      stroke-dasharray: 8 8;
+      opacity: 0.9;
+      filter: drop-shadow(0 0 6px rgba(96,165,250,0.55));
+      animation: dashmove 1.4s linear infinite;
+    }
+
+    .mig-line {
+      stroke-width: 5;
+      fill: none;
+      stroke-dasharray: 12 10;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      marker-end: url(#arrowhead2);
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.4));
+    }
+
+    .mig1 { stroke: #60a5fa; }
+    .mig2 { stroke: #4ade80; }
+    .mig3 { stroke: #facc15; }
+    .mig4 { stroke: #f9a8d4; }
+
+    .show-line {
+      opacity: 1;
+      animation: dashmove 1s linear infinite;
+    }
+
+    @keyframes dashmove {
+      to { stroke-dashoffset: -40; }
+    }
+
+    @media (max-width: 1300px) {
+      .hosts { grid-template-columns: repeat(3, 1fr); }
+      .cards, .bottom-grid { grid-template-columns: repeat(2, 1fr); }
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 900px) {
+      .hosts, .cards, .bottom-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-particles" id="particles"></div>
+
+  <div class="container">
+    <h1>Green Cloud Computing - Smart VM Optimization</h1>
+    <div class="subtitle">Task Allocation, Resource Utilization and Energy Optimization in Cloud Environment</div>
+
+    <div class="controls">
+      <button class="btn-initial" onclick="showInitial()">Show Initial Allocation</button>
+      <button class="btn-normal" onclick="runNormalOptimization()">Run Normal Optimization</button>
+      <button class="btn-ai" onclick="runAIOptimization()">Run AI Optimization</button>
+      <button class="btn-failure" onclick="simulateFailure()">Simulate Host Failure</button>
+      <button class="btn-reset" onclick="resetDemo()">Reset</button>
+    </div>
+
+    <div class="cards">
+      <div class="card"><h3>Current Mode</h3><div class="value" id="modeCard" style="font-size:22px;">Initial</div></div>
+      <div class="card"><h3>Total Energy</h3><div class="value" id="energyCard">820 W</div></div>
+      <div class="card"><h3>Active Hosts</h3><div class="value" id="hostsCard">5</div></div>
+      <div class="card"><h3>CPU Utilization</h3><div class="value" id="cpuCard">41%</div></div>
+      <div class="card"><h3>VM Migrations</h3><div class="value" id="migrationCard">0</div></div>
+      <div class="card"><h3>System State</h3><div class="value" id="stateCard" style="font-size:22px;">Stable</div></div>
+    </div>
+
+    <div class="section">
+      <div class="task-row">
+        <div class="task" id="task1">Web Task → VM1</div>
+        <div class="task" id="task2">DB Task → VM2</div>
+        <div class="task" id="task3">AI Task → VM3</div>
+        <div class="task" id="task4">Storage → VM4</div>
+        <div class="task" id="task5">API Task → VM5</div>
+        <div class="task" id="task6">Video Job → VM6</div>
+        <div class="task" id="task7">ML Job → VM7</div>
+        <div class="task" id="task8">Backup → VM8</div>
+        <div class="task" id="task9">Analytics → VM9</div>
+        <div class="task" id="task10">Stream → VM10</div>
+      </div>
+
+      <div class="broker-wrap">
+        <div class="broker" id="broker">
+          <h2>Cloud Broker</h2>
+          <p>Schedules tasks and allocates VMs to hosts</p>
+        </div>
+      </div>
+
+      <svg class="overlay" viewBox="0 0 1500 420" preserveAspectRatio="none">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#ffffff"></polygon>
+          </marker>
+        </defs>
+        <path class="flow-line" marker-end="url(#arrowhead)" d="M 230 80 C 420 80, 470 145, 620 145"></path>
+        <path class="flow-line" marker-end="url(#arrowhead)" d="M 760 145 C 900 145, 950 290, 1000 290"></path>
+      </svg>
+
+      <div class="status-line" id="statusText">Click a mode button to start the demo.</div>
+
+      <div class="main-grid">
+        <div class="steps-panel">
+          <h3>Optimization Steps</h3>
+          <div class="step" id="step1">1. Tasks assigned to virtual machines</div>
+          <div class="step" id="step2">2. Broker distributes VMs to physical hosts</div>
+          <div class="step" id="step3">3. Monitor host CPU and resource utilization</div>
+          <div class="step" id="step4">4. Detect underloaded or failed hosts</div>
+          <div class="step" id="step5">5. Migrate VMs to suitable hosts</div>
+          <div class="step" id="step6">6. Turn OFF empty hosts</div>
+          <div class="step" id="step7">7. Show energy reduction and better utilization</div>
+        </div>
+
+        <div class="datacenter">
+          <div class="datacenter-title">Green Cloud Data Center</div>
+
+          <svg class="overlay" viewBox="0 0 1200 560" preserveAspectRatio="none">
+            <defs>
+              <marker id="arrowhead2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#ffffff"></polygon>
+              </marker>
+            </defs>
+            <path id="mig1" class="mig-line mig1" d=""></path>
+            <path id="mig2" class="mig-line mig2" d=""></path>
+            <path id="mig3" class="mig-line mig3" d=""></path>
+            <path id="mig4" class="mig-line mig4" d=""></path>
+          </svg>
+
+          <div class="hosts">
+            <div class="host on" id="host1">
+              <h2>HOST 1</h2>
+              <p id="host1status"><span class="light"></span>ON</p>
+              <p id="host1cpuText">CPU: 32%</p>
+              <p id="host1ramText">RAM: 38%</p>
+              <p id="host1powerText">Power: 155 W</p>
+              <div class="host-content" id="content1"></div>
+              <div class="meter-group">
+                <div class="meter-label">CPU Load</div>
+                <div class="meter"><div class="meter-fill cpu-fill" id="host1cpuFill"></div></div>
+                <div class="meter-label">RAM Usage</div>
+                <div class="meter"><div class="meter-fill ram-fill" id="host1ramFill"></div></div>
+                <div class="meter-label">Power Usage</div>
+                <div class="meter"><div class="meter-fill power-fill" id="host1powerFill"></div></div>
+              </div>
+              <div class="host-footer" id="host1footer">VMs: 2 / 5</div>
+            </div>
+
+            <div class="host on" id="host2">
+              <h2>HOST 2</h2>
+              <p id="host2status"><span class="light"></span>ON</p>
+              <p id="host2cpuText">CPU: 36%</p>
+              <p id="host2ramText">RAM: 42%</p>
+              <p id="host2powerText">Power: 160 W</p>
+              <div class="host-content" id="content2"></div>
+              <div class="meter-group">
+                <div class="meter-label">CPU Load</div>
+                <div class="meter"><div class="meter-fill cpu-fill" id="host2cpuFill"></div></div>
+                <div class="meter-label">RAM Usage</div>
+                <div class="meter"><div class="meter-fill ram-fill" id="host2ramFill"></div></div>
+                <div class="meter-label">Power Usage</div>
+                <div class="meter"><div class="meter-fill power-fill" id="host2powerFill"></div></div>
+              </div>
+              <div class="host-footer" id="host2footer">VMs: 2 / 5</div>
+            </div>
+
+            <div class="host on" id="host3">
+              <h2>HOST 3</h2>
+              <p id="host3status"><span class="light"></span>ON</p>
+              <p id="host3cpuText">CPU: 44%</p>
+              <p id="host3ramText">RAM: 50%</p>
+              <p id="host3powerText">Power: 170 W</p>
+              <div class="host-content" id="content3"></div>
+              <div class="meter-group">
+                <div class="meter-label">CPU Load</div>
+                <div class="meter"><div class="meter-fill cpu-fill" id="host3cpuFill"></div></div>
+                <div class="meter-label">RAM Usage</div>
+                <div class="meter"><div class="meter-fill ram-fill" id="host3ramFill"></div></div>
+                <div class="meter-label">Power Usage</div>
+                <div class="meter"><div class="meter-fill power-fill" id="host3powerFill"></div></div>
+              </div>
+              <div class="host-footer" id="host3footer">VMs: 2 / 5</div>
+            </div>
+
+            <div class="host on" id="host4">
+              <h2>HOST 4</h2>
+              <p id="host4status"><span class="light"></span>ON</p>
+              <p id="host4cpuText">CPU: 18%</p>
+              <p id="host4ramText">RAM: 22%</p>
+              <p id="host4powerText">Power: 125 W</p>
+              <div class="host-content" id="content4"></div>
+              <div class="meter-group">
+                <div class="meter-label">CPU Load</div>
+                <div class="meter"><div class="meter-fill cpu-fill" id="host4cpuFill"></div></div>
+                <div class="meter-label">RAM Usage</div>
+                <div class="meter"><div class="meter-fill ram-fill" id="host4ramFill"></div></div>
+                <div class="meter-label">Power Usage</div>
+                <div class="meter"><div class="meter-fill power-fill" id="host4powerFill"></div></div>
+              </div>
+              <div class="host-footer" id="host4footer">VMs: 2 / 5</div>
+            </div>
+
+            <div class="host on" id="host5">
+              <h2>HOST 5</h2>
+              <p id="host5status"><span class="light"></span>ON</p>
+              <p id="host5cpuText">CPU: 14%</p>
+              <p id="host5ramText">RAM: 18%</p>
+              <p id="host5powerText">Power: 110 W</p>
+              <div class="host-content" id="content5"></div>
+              <div class="meter-group">
+                <div class="meter-label">CPU Load</div>
+                <div class="meter"><div class="meter-fill cpu-fill" id="host5cpuFill"></div></div>
+                <div class="meter-label">RAM Usage</div>
+                <div class="meter"><div class="meter-fill ram-fill" id="host5ramFill"></div></div>
+                <div class="meter-label">Power Usage</div>
+                <div class="meter"><div class="meter-fill power-fill" id="host5powerFill"></div></div>
+              </div>
+              <div class="host-footer" id="host5footer">VMs: 2 / 5</div>
+            </div>
+          </div>
+
+          <div class="legend">
+            <div><span class="legend-box" style="background:#2563eb;"></span>VM1</div>
+            <div><span class="legend-box" style="background:#7c3aed;"></span>VM2</div>
+            <div><span class="legend-box" style="background:#db2777;"></span>VM3</div>
+            <div><span class="legend-box" style="background:#0f766e;"></span>VM4</div>
+            <div><span class="legend-box" style="background:#ea580c;"></span>VM5</div>
+            <div><span class="legend-box" style="background:#ca8a04;"></span>VM6</div>
+            <div><span class="legend-box" style="background:#dc2626;"></span>VM7</div>
+            <div><span class="legend-box" style="background:#16a34a;"></span>VM8</div>
+            <div><span class="legend-box" style="background:#4f46e5;"></span>VM9</div>
+            <div><span class="legend-box" style="background:#e11d48;"></span>VM10</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-grid">
+      <div class="panel">
+        <h3>System Output</h3>
+        <ul id="resultList">
+          <li>Tasks are assigned to 10 virtual machines.</li>
+          <li>5 physical hosts are active in the initial state.</li>
+          <li>Optimization will reduce active hosts and save energy.</li>
+          <li>Empty hosts will be turned OFF automatically.</li>
+          <li>AI mode provides better consolidation than normal mode.</li>
+        </ul>
+        <div class="energy-badge" id="energyBadge">Energy Saved: ---</div>
+      </div>
+
+      <div class="panel">
+        <h3>Mode Comparison</h3>
+        <table>
+          <tr>
+            <th>Mode</th>
+            <th>Energy</th>
+            <th>Hosts</th>
+            <th>CPU</th>
+            <th>Migrations</th>
+          </tr>
+          <tr>
+            <td>Traditional</td>
+            <td>820 W</td>
+            <td>5</td>
+            <td>41%</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td>Normal Optimization</td>
+            <td>610 W</td>
+            <td>3</td>
+            <td>74%</td>
+            <td>4</td>
+          </tr>
+          <tr>
+            <td>AI Optimization</td>
+            <td>540 W</td>
+            <td>3</td>
+            <td>81%</td>
+            <td>5</td>
+          </tr>
+          <tr>
+            <td>Host Failure Recovery</td>
+            <td>680 W</td>
+            <td>4</td>
+            <td>63%</td>
+            <td>2</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>Energy Comparison</h3>
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-label">Traditional Allocation</div>
+            <div class="bar"><div class="fill before" id="barTraditional" style="width:100%;">820 W</div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Normal Optimization</div>
+            <div class="bar"><div class="fill normal" id="barNormal" style="width:0%;">---</div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">AI Optimization</div>
+            <div class="bar"><div class="fill ai" id="barAI" style="width:0%;">---</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const initialLayout = {
+      vm1:  {host: 1, left: 12, top: 12},
+      vm2:  {host: 1, left: 90, top: 12},
+      vm3:  {host: 2, left: 12, top: 12},
+      vm4:  {host: 2, left: 90, top: 12},
+      vm5:  {host: 3, left: 12, top: 12},
+      vm6:  {host: 3, left: 90, top: 12},
+      vm7:  {host: 4, left: 12, top: 12},
+      vm8:  {host: 4, left: 90, top: 12},
+      vm9:  {host: 5, left: 12, top: 12},
+      vm10: {host: 5, left: 90, top: 12}
+    };
+
+    const normalLayout = {
+      vm1:  {host: 1, left: 12, top: 12},
+      vm2:  {host: 1, left: 90, top: 12},
+      vm3:  {host: 2, left: 12, top: 12},
+      vm4:  {host: 2, left: 90, top: 12},
+      vm5:  {host: 3, left: 12, top: 12},
+      vm6:  {host: 3, left: 90, top: 12},
+      vm7:  {host: 1, left: 12, top: 60},
+      vm8:  {host: 2, left: 90, top: 60},
+      vm9:  {host: 3, left: 12, top: 60},
+      vm10: {host: 1, left: 90, top: 60}
+    };
+
+    const aiLayout = {
+      vm1:  {host: 1, left: 12, top: 12},
+      vm2:  {host: 1, left: 90, top: 12},
+      vm3:  {host: 2, left: 12, top: 12},
+      vm4:  {host: 2, left: 90, top: 12},
+      vm5:  {host: 3, left: 12, top: 12},
+      vm6:  {host: 3, left: 90, top: 12},
+      vm7:  {host: 1, left: 12, top: 60},
+      vm8:  {host: 2, left: 90, top: 60},
+      vm9:  {host: 3, left: 12, top: 60},
+      vm10: {host: 2, left: 12, top: 60}
+    };
+
+    const failureLayout = {
+      vm3: {host: 1, left: 12, top: 60},
+      vm4: {host: 3, left: 90, top: 60}
+    };
+
+    let busy = false;
+
+    function createParticles() {
+      const wrap = document.getElementById("particles");
+      wrap.innerHTML = "";
+      for (let i = 0; i < 25; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.animationDuration = (8 + Math.random() * 12) + "s";
+        p.style.animationDelay = (Math.random() * 8) + "s";
+        p.style.width = p.style.height = (4 + Math.random() * 8) + "px";
+        wrap.appendChild(p);
+      }
+    }
+
+    function createVM(id, className) {
+      const div = document.createElement("div");
+      div.className = `vm ${className}`;
+      div.id = id;
+      div.innerText = id.toUpperCase();
+      return div;
+    }
+
+    function clearHosts() {
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`content${i}`).innerHTML = "";
+      }
+    }
+
+    function renderVMs(layout) {
+      clearHosts();
+      for (const vm in layout) {
+        const item = layout[vm];
+        const vmDiv = createVM(vm, vm);
+        vmDiv.style.left = item.left + "px";
+        vmDiv.style.top = item.top + "px";
+        document.getElementById(`content${item.host}`).appendChild(vmDiv);
+      }
+      updateHostFooters();
+    }
+
+    function setTasksAssigned() {
+      for (let i = 1; i <= 10; i++) {
+        document.getElementById(`task${i}`).classList.add("assigned");
+      }
+    }
+
+    function clearTaskAssigned() {
+      for (let i = 1; i <= 10; i++) {
+        document.getElementById(`task${i}`).classList.remove("assigned");
+      }
+    }
+
+    function setBrokerActive(active) {
+      document.getElementById("broker").classList.toggle("active", active);
+    }
+
+    function setStep(activeNo, failure = false) {
+      for (let i = 1; i <= 7; i++) {
+        const step = document.getElementById(`step${i}`);
+        step.classList.remove("active", "failure");
+      }
+      if (activeNo) {
+        document.getElementById(`step${activeNo}`).classList.add(failure ? "failure" : "active");
+      }
+    }
+
+    function setStatus(text, alert = false) {
+      const el = document.getElementById("statusText");
+      el.innerText = text;
+      el.classList.toggle("alert", alert);
+    }
+
+    function setModeCard(text, color = "#fff") {
+      const el = document.getElementById("modeCard");
+      el.innerText = text;
+      el.style.color = color;
+    }
+
+    function setStateCard(text, color = "#fff") {
+      const el = document.getElementById("stateCard");
+      el.innerText = text;
+      el.style.color = color;
+    }
+
+    function setBar(id, width, text) {
+      const el = document.getElementById(id);
+      el.style.width = width;
+      el.innerText = text;
+    }
+
+    function setResultList(items) {
+      document.getElementById("resultList").innerHTML = items.map(x => `<li>${x}</li>`).join("");
+    }
+
+    function animateCounter(id, start, end, suffix = "", duration = 1200) {
+      const el = document.getElementById(id);
+      const steps = 40;
+      let current = 0;
+      const inc = (end - start) / steps;
+      const timer = setInterval(() => {
+        current++;
+        const val = start + inc * current;
+        if (current >= steps) {
+          clearInterval(timer);
+          el.innerText = `${end}${suffix}`;
+        } else {
+          el.innerText = `${Math.round(val)}${suffix}`;
+        }
+      }, duration / steps);
+    }
+
+    function updateMeter(hostNo, cpu, ram, power) {
+      document.getElementById(`host${hostNo}cpuFill`).style.width = cpu;
+      document.getElementById(`host${hostNo}ramFill`).style.width = ram;
+      document.getElementById(`host${hostNo}powerFill`).style.width = power;
+    }
+
+    function setHostState(hostNo, state, cpu, ram, powerW) {
+      const host = document.getElementById(`host${hostNo}`);
+      const status = document.getElementById(`host${hostNo}status`);
+      host.classList.remove("on", "off", "failed");
+
+      if (state === "on") {
+        host.classList.add("on");
+        status.innerHTML = `<span class="light"></span>ON`;
+      } else if (state === "off") {
+        host.classList.add("off");
+        status.innerHTML = `<span class="light off"></span>OFF`;
+      } else {
+        host.classList.add("failed");
+        status.innerHTML = `<span class="light fail"></span>FAILED`;
+      }
+
+      document.getElementById(`host${hostNo}cpuText`).innerText = `CPU: ${cpu}`;
+      document.getElementById(`host${hostNo}ramText`).innerText = `RAM: ${ram}`;
+      document.getElementById(`host${hostNo}powerText`).innerText = `Power: ${powerW}`;
+
+      const cpuVal = state === "off" ? "0%" : cpu;
+      const ramVal = state === "off" ? "0%" : ram;
+      const pwr = state === "off" ? "0%" : powerW.replace(" W", "%");
+      updateMeter(hostNo, cpuVal, ramVal, pwr);
+    }
+
+    function updateHostFooters() {
+      for (let i = 1; i <= 5; i++) {
+        const count = document.getElementById(`content${i}`).children.length;
+        document.getElementById(`host${i}footer`).innerText = `VMs: ${count} / 5`;
+      }
+    }
+
+    function applyEmptyOff() {
+      for (let i = 1; i <= 5; i++) {
+        const count = document.getElementById(`content${i}`).children.length;
+        if (count === 0) {
+          setHostState(i, "off", "0%", "0%", "0 W");
+        }
+      }
+      updateHostFooters();
+    }
+
+    function showLines(paths) {
+      ["mig1","mig2","mig3","mig4"].forEach((id, idx) => {
+        const el = document.getElementById(id);
+        if (paths[idx]) {
+          el.setAttribute("d", paths[idx]);
+          el.classList.add("show-line");
+        } else {
+          el.setAttribute("d", "");
+          el.classList.remove("show-line");
+        }
+      });
+    }
+
+    function hideLines() {
+      ["mig1","mig2","mig3","mig4"].forEach(id => {
+        const el = document.getElementById(id);
+        el.setAttribute("d", "");
+        el.classList.remove("show-line");
+      });
+    }
+
+    function markMoving(vmIds, moving) {
+      vmIds.forEach(id => {
+        const vm = document.getElementById(id);
+        if (vm) vm.classList.toggle("moving", moving);
+      });
+    }
+
+    function moveVM(vmId, targetHostId, left, top) {
+      const vm = document.getElementById(vmId);
+      if (!vm) return;
+      vm.classList.add("moving");
+      document.getElementById(`content${targetHostId}`).appendChild(vm);
+      vm.style.left = left + "px";
+      vm.style.top = top + "px";
+      setTimeout(() => vm.classList.remove("moving"), 2200);
+    }
+
+    function setBaseHosts() {
+      setHostState(1, "on", "32%", "38%", "62 W");
+      setHostState(2, "on", "36%", "42%", "64 W");
+      setHostState(3, "on", "44%", "50%", "68 W");
+      setHostState(4, "on", "18%", "22%", "45 W");
+      setHostState(5, "on", "14%", "18%", "40 W");
+    }
+
+    function showInitial() {
+      busy = false;
+      hideLines();
+      clearTaskAssigned();
+      renderVMs(initialLayout);
+      setTasksAssigned();
+      setBrokerActive(false);
+      setStep(1);
+      setBaseHosts();
+
+      setModeCard("Initial", "#ffffff");
+      setStateCard("Stable", "#ffffff");
+      setStatus("Initial Allocation: Tasks are assigned to 10 VMs and distributed across all 5 hosts.");
+
+      document.getElementById("energyCard").innerText = "820 W";
+      document.getElementById("hostsCard").innerText = "5";
+      document.getElementById("cpuCard").innerText = "41%";
+      document.getElementById("migrationCard").innerText = "0";
+      document.getElementById("energyBadge").innerText = "Energy Saved: 0%";
+
+      setBar("barNormal", "0%", "---");
+      setBar("barAI", "0%", "---");
+
+      setResultList([
+        "Tasks are assigned to 10 virtual machines.",
+        "5 physical hosts are active in the initial state.",
+        "Energy consumption is high because all hosts are active.",
+        "Underloaded hosts are still consuming power.",
+        "Optimization will improve resource utilization."
+      ]);
+    }
+
+    function runNormalOptimization() {
+      if (busy) return;
+      busy = true;
+      showInitial();
+      setModeCard("Normal", "#86efac");
+      setStateCard("Optimizing", "#fde68a");
+      setBrokerActive(true);
+      setStep(3);
+      setStatus("Normal Optimization: Monitoring host utilization and detecting underloaded hosts.");
+
+      setTimeout(() => {
+        setStep(4);
+        setStatus("Underloaded hosts detected: Host 4 and Host 5.");
+      }, 900);
+
+      setTimeout(() => {
+        setStep(5);
+        setStatus("Migrating VMs from Host 4 and Host 5 to Host 1, Host 2 and Host 3.");
+        showLines([
+          "M 830 255 C 720 230, 500 210, 240 250",
+          "M 900 255 C 820 280, 630 285, 510 285",
+          "M 1080 255 C 980 290, 860 300, 760 320",
+          "M 1110 240 C 900 180, 520 180, 310 250"
+        ]);
+
+        moveVM("vm7", 1, normalLayout.vm7.left, normalLayout.vm7.top);
+        moveVM("vm8", 2, normalLayout.vm8.left, normalLayout.vm8.top);
+        moveVM("vm9", 3, normalLayout.vm9.left, normalLayout.vm9.top);
+        moveVM("vm10", 1, normalLayout.vm10.left, normalLayout.vm10.top);
+        animateCounter("migrationCard", 0, 4, "");
+      }, 1800);
+
+      setTimeout(() => {
+        setStep(6);
+        setHostState(1, "on", "78%", "74%", "92 W");
+        setHostState(2, "on", "65%", "68%", "80 W");
+        setHostState(3, "on", "79%", "71%", "74 W");
+        applyEmptyOff();
+        setStatus("Empty hosts are turned OFF automatically after VM migration.");
+      }, 4300);
+
+      setTimeout(() => {
+        hideLines();
+        setStep(7);
+        animateCounter("energyCard", 820, 610, " W");
+        animateCounter("hostsCard", 5, 3, "");
+        animateCounter("cpuCard", 41, 74, "%");
+        setStateCard("Completed", "#86efac");
+        document.getElementById("energyBadge").innerText = "Energy Saved: 25.61%";
+        setBar("barNormal", "74%", "610 W");
+        setBrokerActive(false);
+
+        setResultList([
+          "Normal optimization migrated 4 VMs from underloaded hosts.",
+          "Host 4 and Host 5 became empty and were turned OFF.",
+          "Active hosts reduced from 5 to 3.",
+          "Total energy reduced from 820 W to 610 W.",
+          "CPU utilization improved to 74%."
+        ]);
+
+        setStatus("Normal Optimization Complete: Fewer hosts are active and energy consumption is reduced.");
+        busy = false;
+      }, 6000);
+    }
+
+    function runAIOptimization() {
+      if (busy) return;
+      busy = true;
+      showInitial();
+      setModeCard("AI", "#c4b5fd");
+      setStateCard("AI Running", "#c4b5fd");
+      setBrokerActive(true);
+      setStep(3);
+      setStatus("AI Optimization: Predicting workload and selecting best host placement.");
+
+      setTimeout(() => {
+        setStep(4);
+        setStatus("AI detected low-utilization hosts and selected best-fit target hosts.");
+      }, 900);
+
+      setTimeout(() => {
+        setStep(5);
+        setStatus("AI is migrating VMs using smart workload balancing.");
+        showLines([
+          "M 830 255 C 720 180, 480 180, 240 250",
+          "M 900 255 C 820 230, 670 235, 510 285",
+          "M 1080 255 C 1000 245, 890 255, 760 320",
+          "M 1110 240 C 980 160, 750 145, 480 270"
+        ]);
+
+        moveVM("vm7", 1, aiLayout.vm7.left, aiLayout.vm7.top);
+        moveVM("vm8", 2, aiLayout.vm8.left, aiLayout.vm8.top);
+        moveVM("vm9", 3, aiLayout.vm9.left, aiLayout.vm9.top);
+        moveVM("vm10", 2, aiLayout.vm10.left, aiLayout.vm10.top);
+        animateCounter("migrationCard", 0, 5, "");
+      }, 1800);
+
+      setTimeout(() => {
+        setStep(6);
+        setHostState(1, "on", "75%", "70%", "82 W");
+        setHostState(2, "on", "81%", "78%", "76 W");
+        setHostState(3, "on", "87%", "73%", "66 W");
+        applyEmptyOff();
+        setStatus("AI completed consolidation and turned OFF unused hosts.");
+      }, 4300);
+
+      setTimeout(() => {
+        hideLines();
+        setStep(7);
+        animateCounter("energyCard", 820, 540, " W");
+        animateCounter("hostsCard", 5, 3, "");
+        animateCounter("cpuCard", 41, 81, "%");
+        setStateCard("AI Complete", "#a78bfa");
+        document.getElementById("energyBadge").innerText = "Energy Saved: 34.15%";
+        setBar("barAI", "66%", "540 W");
+        setBrokerActive(false);
+
+        setResultList([
+          "AI optimization predicted better placement for 10 VMs.",
+          "5 VM migrations were used for smarter balancing.",
+          "Only 3 hosts remained active after consolidation.",
+          "Energy dropped from 820 W to 540 W.",
+          "CPU utilization increased to 81%, better than normal optimization."
+        ]);
+
+        setStatus("AI Optimization Complete: Best energy saving and improved workload distribution achieved.");
+        busy = false;
+      }, 6000);
+    }
+
+    function simulateFailure() {
+      if (busy) return;
+      busy = true;
+      showInitial();
+      setModeCard("Failure", "#fda4af");
+      setStateCard("Alert", "#fda4af");
+      setBrokerActive(true);
+      setStep(4, true);
+      setStatus("Failure Simulation: Host 2 has failed unexpectedly.", true);
+      setHostState(2, "failed", "---", "---", "---");
+
+      setTimeout(() => {
+        setStatus("Migrating VM3 and VM4 from failed Host 2 to Host 1 and Host 3.", true);
+        showLines([
+          "M 510 285 C 420 260, 340 255, 240 250",
+          "M 510 285 C 600 300, 690 315, 760 320",
+          "",
+          ""
+        ]);
+
+        moveVM("vm3", 1, failureLayout.vm3.left, failureLayout.vm3.top);
+        moveVM("vm4", 3, failureLayout.vm4.left, failureLayout.vm4.top);
+        animateCounter("migrationCard", 0, 2, "");
+      }, 1700);
+
+      setTimeout(() => {
+        setHostState(1, "on", "58%", "56%", "72 W");
+        setHostState(2, "off", "0%", "0%", "0 W");
+        setHostState(3, "on", "63%", "61%", "78 W");
+        setHostState(4, "on", "18%", "22%", "45 W");
+        setHostState(5, "on", "14%", "18%", "40 W");
+        updateHostFooters();
+        setStatus("Failure recovered: workloads reallocated and services continued.");
+      }, 3900);
+
+      setTimeout(() => {
+        hideLines();
+        animateCounter("energyCard", 820, 680, " W");
+        animateCounter("hostsCard", 5, 4, "");
+        animateCounter("cpuCard", 41, 63, "%");
+        setStateCard("Recovered", "#86efac");
+        document.getElementById("energyBadge").innerText = "Energy Saved: Failure Recovery Mode";
+        setBrokerActive(false);
+
+        setResultList([
+          "Host 2 failure was detected immediately.",
+          "VM3 and VM4 were migrated to Host 1 and Host 3.",
+          "The failed host was isolated and marked OFF.",
+          "Services continued without total system shutdown.",
+          "Failure recovery improves project strength and reliability."
+        ]);
+
+        setStatus("Failure Recovery Complete: VMs were reallocated successfully after host failure.");
+        busy = false;
+      }, 5600);
+    }
+
+    function resetDemo() {
+      showInitial();
+      setStatus("Reset complete. Choose another mode.");
+    }
+
+    window.onload = () => {
+      createParticles();
+      showInitial();
+    };
+  </script>
+</body>
+</html>
